@@ -162,8 +162,8 @@
 
                 {{-- Profil Saya --}}
                 @php
-    $profileRoute = route($role . '.myprofile.index');
-    $isActive = request()->routeIs($role . '.myprofile.*');
+    $profileRoute = route($role . '.profile.index');
+    $isActive = request()->routeIs($role . '.profile.*');
 @endphp
 
 <a href="{{ $profileRoute }}"

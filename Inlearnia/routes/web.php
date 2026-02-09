@@ -65,8 +65,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('kelas', ClassRoomController::class);
 
         Route::get('/my-profile', function () {
-            return view('admin.myprofile.index');
-        })->name('myprofile.index');
+            return view('admin.profile.index');
+        })->name('profile.index');
 
     });
 
@@ -83,8 +83,8 @@ Route::middleware(['auth', 'role:teacher'])
             return view('pengajar.dashboard');
         })->name('dashboard');
         Route::get('/my-profile', function () {
-            return view('pengajar.myprofile.index');
-        })->name('myprofile.index');
+            return view('pengajar.profile.index');
+        })->name('profile.index');
 
     });
 
@@ -101,8 +101,8 @@ Route::middleware(['auth', 'role:student'])
             return view('siswa.dashboard');
         })->name('dashboard');
         Route::get('/my-profile', function () {
-            return view('siswa.myprofile.index');
-        })->name('myprofile.index');
+            return view('siswa.profile.index');
+        })->name('profile.index');
 
     });
 
