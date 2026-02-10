@@ -164,10 +164,10 @@
                 </div>
 
             </div>
+
+        </div>
             <!-- footer tanpa animasi -->
             <x-logres.footer />
-        </div>
-
         <script>
             // Fungsi untuk toggle password (ditambahkan di sini)
             function togglePassword() {
