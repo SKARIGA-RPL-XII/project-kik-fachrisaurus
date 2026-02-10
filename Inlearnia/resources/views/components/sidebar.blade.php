@@ -92,10 +92,12 @@
                 <p class="px-[20px] text-[14px] font-semibold text-slate-700 mb-[15px]">Akademik</p>
                 <div class="pl-[20px] space-y-4">
 
-                    {{-- List Kelas (User View) --}}
-                    {{-- TODO: Tambahkan route khusus kelas teacher/student di web.php --}}
+                    {{-- List Kelas --}}
+                    {{-- Menggunakan $role agar dinamis: teacher.kelas.index atau student.kelas.index --}}
+                    @php $kelasRoute = route($role . '.kelas.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.kelas.*'); @endphp
-                    <a href="#"
+                    
+                    <a href="{{ $kelasRoute }}"
                         class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
                 {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -109,9 +111,10 @@
                     </a>
 
                     {{-- Jadwal Anda --}}
-                    {{-- TODO: Tambahkan route khusus jadwal di web.php --}}
+                    @php $jadwalRoute = route($role . '.jadwal.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.jadwal.*'); @endphp
-                    <a href="#"
+                    
+                    <a href="{{ $jadwalRoute }}"
                         class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
                 {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
