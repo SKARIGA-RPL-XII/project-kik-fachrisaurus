@@ -136,4 +136,12 @@ class ClassRoomController extends Controller
         $kela->delete();
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil dihapus!');
     }
+
+    public function show(ClassRoom $kelas)
+{
+    $kelas->load(['subject', 'teacher', 'students']);
+
+    return view('admin.kelas.show', compact('kelas'));
+}
+
 }

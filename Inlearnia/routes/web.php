@@ -48,7 +48,7 @@ Route::middleware(['auth', 'role:admin'])
         
         Route::get('/my-profile', function () {
             return view('admin.profile.index');
-        })->name('profile.index');
+        })->name(name: 'profile.index');
     });
 
 /*

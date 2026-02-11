@@ -182,7 +182,7 @@
                         </div>
 
                         {{-- Tombol Detail --}}
-                        <a href="{{ route('admin.kelas.edit', $class->id) }}" class="w-[120px] h-[35px] flex items-center justify-center rounded-[8px] bg-[#00A79D] text-white text-sm font-medium hover:bg-[#008f87] transition-all">
+                        <a href="{{ route('admin.kelas.show', $class->id) }}" class="w-[120px] h-[35px] flex items-center justify-center rounded-[8px] bg-[#00A79D] text-white text-sm font-medium hover:bg-[#008f87] transition-all">
                             Detail
                         </a>
                     </div>
