@@ -114,7 +114,7 @@
                         <span class="text-[14px] font-medium">Kelas Saya</span>
                     </a>
 
-                    {{-- Jadwal Anda --}}
+                    {{-- Jadwal Saya --}}
                     @php $jadwalRoute = route($role . '.jadwal.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.jadwal.*'); @endphp
                     
@@ -137,7 +137,7 @@
                                 stroke-linecap="round" stroke-linejoin="round"
                                 class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
                         </svg>
-                        <span class="text-[14px] font-medium">Jadwal Anda</span>
+                        <span class="text-[14px] font-medium">Jadwal Saya</span>
                     </a>
                 </div>
                 <div class="mt-[30px] px-[20px]">

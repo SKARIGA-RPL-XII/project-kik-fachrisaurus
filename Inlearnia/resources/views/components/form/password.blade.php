@@ -2,6 +2,7 @@
 
 <div class="relative">
     <input
+        {{ $attributes }}
         id="{{ $id }}"
         type="password"
         placeholder="{{ $placeholder }}"
@@ -42,7 +43,6 @@
                                 c-1.274-4.057-5.064-7-9.542-7
                                 -1.14 0-2.234.191-3.247.538" />
         </svg>
-
     </button>
 </div>
 
