@@ -9,6 +9,7 @@ class ClassRoom extends Model
 {
     use HasFactory;
 
+    // Nama tabel manual
     protected $table = 'classes';
 
     protected $fillable = [
@@ -37,8 +38,6 @@ class ClassRoom extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-
-
     public function students()
     {
         return $this->belongsToMany(
@@ -52,5 +51,12 @@ class ClassRoom extends Model
     public function meetings()
     {
         return $this->hasMany(Meeting::class, 'class_id');
+    }
+
+    // --- INI YANG BARU DITAMBAHKAN ---
+    public function announcements()
+    {
+        // Parameter kedua 'class_id' wajib ada karena nama tabelmu 'classes'
+        return $this->hasMany(Announcement::class, 'class_id');
     }
 }

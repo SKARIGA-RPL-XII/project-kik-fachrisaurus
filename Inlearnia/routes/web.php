@@ -27,8 +27,8 @@ Route::get('/', function () {
 Route::middleware(['auth'])->get('/dashboard', function () {
     $role = auth()->user()->role;
     if ($role === 'admin') return redirect()->route('admin.dashboard');
-    if ($role === 'teacher') return redirect()->route('teacher.dashboard'); // Perbaikan: konsisten nama route prefix
-    if ($role === 'student') return redirect()->route('student.dashboard'); // Perbaikan: konsisten nama route prefix
+    if ($role === 'teacher') return redirect()->route('teacher.dashboard');
+    if ($role === 'student') return redirect()->route('student.dashboard');
     return abort(403);
 })->name('dashboard');
 
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'role:admin'])
         
         Route::get('/my-profile', function () {
             return view('admin.profile.index');
-        })->name(name: 'profile.index');
+        })->name('profile.index'); // Hapus param name: yang tidak perlu
     });
 
 /*
@@ -56,23 +56,39 @@ Route::middleware(['auth', 'role:admin'])
 | TEACHER ROUTES (PENGAJAR)
 |--------------------------------------------------------------------------
 */
+// Import Controller Pengajar
+use App\Http\Controllers\Pengajar\ClassRoomController as PengajarClassController;
+use App\Http\Controllers\Pengajar\MeetingController;      // <-- TAMBAHKAN INI
+use App\Http\Controllers\Pengajar\AnnouncementController; // <-- TAMBAHKAN INI
+
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
+        
         // Dashboard
         Route::get('/dashboard', function () {
             return view('pengajar.dashboard');
         })->name('dashboard');
 
-        // List Kelas (Placeholder View)
-        Route::get('/kelas', function () {
-            return view('pengajar.kelas.index'); // Pastikan file view ini ada
-        })->name('kelas.index');
+        // List Kelas
+        Route::get('/kelas', [PengajarClassController::class, 'index'])->name('kelas.index');
+        Route::get('/kelas/{kelas}', [PengajarClassController::class, 'show'])->name('kelas.show');
 
-        // Jadwal (Placeholder View)
+        // --- TAMBAHAN ROUTE UNTUK PERTEMUAN (MEETINGS) ---
+        Route::get('/meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
+        Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
+        Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
+        Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
+        Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+
+        // --- TAMBAHAN ROUTE UNTUK PENGUMUMAN (ANNOUNCEMENTS) ---
+        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+
+        // Jadwal
         Route::get('/jadwal', function () {
-            return view('pengajar.jadwal.index'); // Pastikan file view ini ada
+            return view('pengajar.jadwal.index'); 
         })->name('jadwal.index');
 
         // Profile
@@ -95,14 +111,14 @@ Route::middleware(['auth', 'role:student'])
             return view('siswa.dashboard');
         })->name('dashboard');
 
-        // List Kelas (Placeholder View)
+        // List Kelas
         Route::get('/kelas', function () {
-            return view('siswa.kelas.index'); // Pastikan file view ini ada
+            return view('siswa.kelas.index');
         })->name('kelas.index');
 
-        // Jadwal (Placeholder View)
+        // Jadwal
         Route::get('/jadwal', function () {
-            return view('siswa.jadwal.index'); // Pastikan file view ini ada
+            return view('siswa.jadwal.index');
         })->name('jadwal.index');
 
         // Profile

@@ -92,22 +92,26 @@
                 <p class="px-[20px] text-[14px] font-semibold text-slate-700 mb-[15px]">Akademik</p>
                 <div class="pl-[20px] space-y-4">
 
-                    {{-- List Kelas --}}
-                    {{-- Menggunakan $role agar dinamis: teacher.kelas.index atau student.kelas.index --}}
+                    {{-- List Kelas (UBAH DISINI: Ganti "List Kelas" jadi "Kelas Saya") --}}
+                    @php $kelasRoute = route($role . '.kelas.index'); @endphp
+                    @php $isActive = request()->routeIs($role . '.kelas.*'); @endphp
+                    
+                    {{-- List Kelas / Kelas Saya (Ikon disamakan dengan Admin) --}}
                     @php $kelasRoute = route($role . '.kelas.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.kelas.*'); @endphp
                     
                     <a href="{{ $kelasRoute }}"
                         class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
-                {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
+                        {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
+                            {{-- Path ini sekarang sama persis dengan milik Admin --}}
                             <path
-                                d="M19.1667 1.66699H0.833333C0.61232 1.66699 0.400358 1.75479 0.244078 1.91107C0.0877974 2.06735 0 2.27931 0 2.50033L0 17.5003C0 17.7213 0.0877974 17.9333 0.244078 18.0896C0.400358 18.2459 0.61232 18.3337 0.833333 18.3337H19.1667C19.3877 18.3337 19.5996 18.2459 19.7559 18.0896C19.9122 17.9333 20 17.7213 20 17.5003V2.50033C20 2.27931 19.9122 2.06735 19.7559 1.91107C19.5996 1.75479 19.3877 1.66699 19.1667 1.66699ZM18.3333 16.667H16.6667V15.8337H12.5V16.667H1.66667V3.33366H18.3333V16.667Z"
+                                d="M19.1667 1.66699H0.833333C0.61232 1.66699 0.400358 1.75479 0.244078 1.91107C0.0877974 2.06735 0 2.27931 0 2.50033L0 17.5003C0 17.7213 0.0877974 17.9333 0.244078 18.0896C0.400358 18.2459 0.61232 18.3337 0.833333 18.3337H19.1667C19.3877 18.3337 19.5996 18.2459 19.7559 18.0896C19.9122 17.9333 20 17.7213 20 17.5003V2.50033C20 2.27931 19.9122 2.06735 19.7559 1.91107C19.5996 1.75479 19.3877 1.66699 19.1667 1.66699ZM18.3333 16.667H16.6667V15.8337H12.5V16.667H1.66667V3.33366H18.3333V16.667ZM8.575 8.09199C8.575 7.71406 8.72513 7.3516 8.99237 7.08437C9.25961 6.81713 9.62207 6.66699 10 6.66699C10.7917 6.66699 11.425 7.30866 11.425 8.09199C11.425 8.88366 10.7917 9.52533 10 9.52533C9.20833 9.52533 8.575 8.88366 8.575 8.09199ZM4.75833 9.40866C4.75833 8.81699 5.24167 8.33366 5.83333 8.33366C6.11844 8.33366 6.39187 8.44692 6.59347 8.64852C6.79507 8.85012 6.90833 9.12355 6.90833 9.40866C6.90833 10.0003 6.425 10.4753 5.83333 10.4753C5.24167 10.4753 4.75833 10.0003 4.75833 9.40866ZM13.0917 9.40866C13.0917 9.12355 13.2049 8.85012 13.4065 8.64852C13.6081 8.44692 13.8816 8.33366 14.1667 8.33366C14.4518 8.33366 14.7252 8.44692 14.9268 8.64852C15.1284 8.85012 15.2417 9.12355 15.2417 9.40866C15.2417 10.0003 14.7583 10.4753 14.1667 10.4753C13.575 10.4753 13.0917 10.0003 13.0917 9.40866ZM16.6667 12.617V13.3337H3.33333V12.617C3.33333 11.8337 4.625 11.192 5.83333 11.192C6.29167 11.192 6.75833 11.2837 7.16667 11.442C7.79167 10.867 8.91667 10.4753 10 10.4753C11.0833 10.4753 12.2083 10.867 12.8333 11.442C13.2417 11.2837 13.7083 11.192 14.1667 11.192C15.375 11.192 16.6667 11.8337 16.6667 12.617Z"
                                 fill="{{ $isActive ? '#FFFFFF' : '#5E5E5E' }}"
                                 fill-opacity="{{ $isActive ? '0.8' : '0.5' }}" />
                         </svg>
-                        <span class="text-[14px] font-medium">List Kelas</span>
+                        <span class="text-[14px] font-medium">Kelas Saya</span>
                     </a>
 
                     {{-- Jadwal Anda --}}
@@ -163,15 +167,13 @@
                     </a>
                 @endif
 
-                {{-- Profil Saya --}}
+                {{-- Profil Saya (Saya perbaiki syntax error di bagian ini agar tidak error saat dicopy) --}}
                 @php
-    $profileRoute = route($role . '.profile.index');
-    $isActive = request()->routeIs($role . '.profile.*');
-@endphp
+                    $profileRoute = route($role . '.profile.index');
+                    $isActive = request()->routeIs($role . '.profile.*');
+                @endphp
 
-<a href="{{ $profileRoute }}"
-
-                <a href="{{ route('profile.edit') }}"
+                <a href="{{ $profileRoute }}"
                     class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
                     {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
