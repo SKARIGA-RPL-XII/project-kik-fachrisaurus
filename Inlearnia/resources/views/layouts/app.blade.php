@@ -52,7 +52,7 @@
     <main class="ml-[370px] pt-[40px] pr-[40px] pb-[50px] min-h-screen">
         @yield('content')
     </main>
-
+@stack('scripts')
 </body>
 
 </html>
