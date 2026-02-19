@@ -9,13 +9,36 @@ use Illuminate\Support\Facades\Auth;
 class SubjectController extends Controller
 {
     public function index()
-    {
-        $subjects = Subject::where('school_id', Auth::user()->school_id)
-            ->latest()
-            ->get();
+{
+    $query = Subject::where('school_id', Auth::user()->school_id);
 
-        return view('admin.mapel.index', compact('subjects'));
+    // 🔎 SEARCH
+    if (request('search')) {
+        $query->where('name', 'like', '%' . request('search') . '%');
     }
+
+    // 🎯 FILTER KURIKULUM
+    if (request('curriculum')) {
+        $query->where('curriculum', request('curriculum'));
+    }
+
+    // 🔄 SORTING
+    if (request('sort')) {
+        $query->orderBy(
+            request('sort'),
+            request('direction', 'asc')
+        );
+    } else {
+        // default sorting terbaru
+        $query->latest();
+    }
+
+    // 📄 PAGINATION (WAJIB ganti get() jadi paginate())
+    $subjects = $query->paginate(5)->withQueryString();
+
+    return view('admin.mapel.index', compact('subjects'));
+}
+
 
     public function create()
     {
