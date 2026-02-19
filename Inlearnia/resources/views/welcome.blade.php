@@ -6,7 +6,14 @@
     <title>Inlearnia</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Prioritas 1: Light Mode (Warna) --}}
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-light.png') }}?v={{ time() }}"
+        media="(prefers-color-scheme: light)">
 
+    {{-- Prioritas 2: Dark Mode (Putih) --}}
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-dark.png') }}?v={{ time() }}"
+        media="(prefers-color-scheme: dark)">
+        
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
