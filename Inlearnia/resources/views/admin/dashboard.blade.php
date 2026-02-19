@@ -64,19 +64,23 @@
                             </div>
                         </div>
 
-                        <div
+                        <a href="{{ route('admin.users.show', $teacher->id) }}"
                             class="w-[22px] h-[22px] bg-[#00A79D] rounded-full flex items-center justify-center text-white shrink-0 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
+
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-3 h-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="3">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                     </div>
                 @endforeach
             </div>
-
-            {{-- Link Lihat Semua di bawah agar rapi --}}
-            <a href="#" class="mt-6 text-center text-[12px] font-semibold text-[#044153] hover:underline">Lihat Semua</a>
         </div>
 
     </div>
