@@ -6,7 +6,14 @@
     <title>Inlearnia</title>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
 
+    
+    <link rel="icon" type="image/png" href="<?php echo e(asset('assets/img/favicon-light.png')); ?>?v=<?php echo e(time()); ?>"
+        media="(prefers-color-scheme: light)">
 
+    
+    <link rel="icon" type="image/png" href="<?php echo e(asset('assets/img/favicon-dark.png')); ?>?v=<?php echo e(time()); ?>"
+        media="(prefers-color-scheme: dark)">
+        
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
