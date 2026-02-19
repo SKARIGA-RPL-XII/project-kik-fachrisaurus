@@ -3,10 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Register - Inlearnia</title>
+    <title>Inlearnia</title>
 
     @vite('resources/css/app.css')
+    {{-- Prioritas 1: Light Mode (Warna) --}}
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-light.png') }}?v={{ time() }}"
+        media="(prefers-color-scheme: light)">
 
+    {{-- Prioritas 2: Dark Mode (Putih) --}}
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-dark.png') }}?v={{ time() }}"
+        media="(prefers-color-scheme: dark)">
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -84,7 +90,7 @@
             </span>
 
             <h3 class="font-medium text-white">Masukkan Email</h3>
-            <p class="text-sm text-white/60">Konfirmasi bahwa email itu milik Anda</p>
+            <p class="text-sm text-white/60">Masukkan email untuk didaftarkan</p>
 
             <div class="absolute left-3 top-10 h-9 w-px bg-white/20"></div>
         </li>
@@ -156,7 +162,7 @@
      x-cloak
      class="flex justify-center pt-24 min-h-full">
 
-                    <x-step.layout title="Masukkan Email Anda" subtitle="Masukkan alamat email yang valid untuk menerima kode">
+                    <x-step.layout title="Masukkan Email Anda" subtitle="Masukkan alamat email yang ingin Anda daftarkan.">
                         <x-slot:icon>
                             <x-step-icon>
                                 <svg class="z-10" width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
