@@ -13,10 +13,18 @@ return new class extends Migration {
 
             $table->enum('type', ['materi', 'tugas']);
             $table->string('title');
-            $table->string('link')->nullable();
-            $table->dateTime('deadline')->nullable();
-            $table->string('topic')->nullable();
             $table->text('description')->nullable();
+            $table->string('topic')->nullable();
+            
+            // Perubahan: Gunakan tipe JSON untuk array links dan files
+            $table->json('links')->nullable();
+            $table->json('files')->nullable();
+            
+            // Kolom khusus tugas
+            $table->dateTime('deadline')->nullable();
+            $table->boolean('disable_late_submission')->default(false);
+            $table->integer('max_score')->nullable();
+            
             $table->timestamps();
         });
     }
