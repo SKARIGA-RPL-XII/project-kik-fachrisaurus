@@ -1,16 +1,17 @@
-@import './animations.css';
+@import "./animations.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 .stepper-item span {
-    transition: background-color 0.3s, border 0.3s;
+    transition:
+        background-color 0.3s,
+        border 0.3s;
 }
 .stepper-item {
     transition: opacity 0.3s;
 }
-
 
 .ripple {
     position: absolute;
@@ -24,11 +25,24 @@
     animation: ripple 2s infinite;
 }
 
-.ripple.animation-delay-200 { animation-delay: 0.5s; }
-.ripple.animation-delay-400 { animation-delay: 1s; }
+.ripple.animation-delay-200 {
+    animation-delay: 0.5s;
+}
+.ripple.animation-delay-400 {
+    animation-delay: 1s;
+}
 
 @keyframes ripple {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.5; }
-    70% { transform: translate(-50%, -50%) scale(2.5); opacity: 0.15; }
-    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.5;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0.15;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
 }

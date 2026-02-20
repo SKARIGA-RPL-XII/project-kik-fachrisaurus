@@ -21,7 +21,7 @@
            value="{{ request('search') }}" 
            placeholder="{{ $placeholder }}" 
            autocomplete="off"
-           class="searchInput w-full h-full pl-12 pr-10 rounded-[10px] border border-gray-200 text-sm focus:outline-none focus:border-[#00A79D] transition-all">
+           class="searchInput w-full h-full pl-12 pr-10 rounded-[10px] border border-gray-200 text-sm focus:outline-none focus:ring-[#00A79D] focus:border-[#00A79D] transition-all">
     
     {{-- Tombol X (Clear) --}}
     <button type="button" class="clearSearchBtn absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
