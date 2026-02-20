@@ -2,11 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\Admin\ClassRoomController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\SubjectController;
+
+// Admin Controllers
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\ClassRoomController as AdminClassRoomController;
+
+// Teacher Controllers
+use App\Http\Controllers\Pengajar\ClassRoomController as TeacherClassRoomController;
+use App\Http\Controllers\Pengajar\MeetingController;
+use App\Http\Controllers\Pengajar\AnnouncementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,10 +21,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 |--------------------------------------------------------------------------
 */
 Route::post('/send-otp', [RegisteredUserController::class, 'sendOtp'])->name('otp.send');
-
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome');
 
 /*
 |--------------------------------------------------------------------------
@@ -25,11 +29,12 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->get('/dashboard', function () {
-    $role = auth()->user()->role;
-    if ($role === 'admin') return redirect()->route('admin.dashboard');
-    if ($role === 'teacher') return redirect()->route('teacher.dashboard');
-    if ($role === 'student') return redirect()->route('student.dashboard');
-    return abort(403);
+    return match (auth()->user()->role) {
+        'admin'   => redirect()->route('admin.dashboard'),
+        'teacher' => redirect()->route('teacher.dashboard'),
+        'student' => redirect()->route('student.dashboard'),
+        default   => abort(403),
+    };
 })->name('dashboard');
 
 /*
@@ -42,13 +47,11 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('users', UserController::class);
+        Route::resource('users', AdminUserController::class);
         Route::resource('mapel', SubjectController::class)->parameters(['mapel' => 'subject']);
-        Route::resource('kelas', ClassRoomController::class);
+        Route::resource('kelas', AdminClassRoomController::class);
         
-        Route::get('/my-profile', function () {
-            return view('admin.profile.index');
-        })->name('profile.index'); // Hapus param name: yang tidak perlu
+        Route::view('/my-profile', 'admin.profile.index')->name('profile.index');
     });
 
 /*
@@ -56,45 +59,30 @@ Route::middleware(['auth', 'role:admin'])
 | TEACHER ROUTES (PENGAJAR)
 |--------------------------------------------------------------------------
 */
-// Import Controller Pengajar
-use App\Http\Controllers\Pengajar\ClassRoomController as PengajarClassController;
-use App\Http\Controllers\Pengajar\MeetingController;      // <-- TAMBAHKAN INI
-use App\Http\Controllers\Pengajar\AnnouncementController; // <-- TAMBAHKAN INI
-
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
+        Route::view('/dashboard', 'pengajar.dashboard')->name('dashboard');
         
-        // Dashboard
-        Route::get('/dashboard', function () {
-            return view('pengajar.dashboard');
-        })->name('dashboard');
-
         // List Kelas
-        Route::get('/kelas', [PengajarClassController::class, 'index'])->name('kelas.index');
-        Route::get('/kelas/{kelas}', [PengajarClassController::class, 'show'])->name('kelas.show');
+        Route::controller(TeacherClassRoomController::class)->group(function () {
+            Route::get('/kelas', 'index')->name('kelas.index');
+            Route::get('/kelas/{kelas}', 'show')->name('kelas.show');
+        });
 
-        // --- TAMBAHAN ROUTE UNTUK PERTEMUAN (MEETINGS) ---
-        Route::get('/meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
-        Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
-        Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
-        Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
-        Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+        // Pertemuan (Meetings) - Hanya except index (karena listnya ada di dalam detail kelas)
+        Route::resource('meetings', MeetingController::class)->except(['index']);
 
-        // --- TAMBAHAN ROUTE UNTUK PENGUMUMAN (ANNOUNCEMENTS) ---
-        Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
-        Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+        // Pengumuman (Announcements)
+        Route::controller(AnnouncementController::class)->group(function () {
+            Route::post('/announcements', 'store')->name('announcements.store');
+            Route::delete('/announcements/{announcement}', 'destroy')->name('announcements.destroy');
+        });
 
-        // Jadwal
-        Route::get('/jadwal', function () {
-            return view('pengajar.jadwal.index'); 
-        })->name('jadwal.index');
-
-        // Profile
-        Route::get('/my-profile', function () {
-            return view('pengajar.profile.index');
-        })->name('profile.index');
+        // Menu Lainnya
+        Route::view('/jadwal', 'pengajar.jadwal.index')->name('jadwal.index');
+        Route::view('/my-profile', 'pengajar.profile.index')->name('profile.index');
     });
 
 /*
@@ -106,25 +94,10 @@ Route::middleware(['auth', 'role:student'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
-        // Dashboard
-        Route::get('/dashboard', function () {
-            return view('siswa.dashboard');
-        })->name('dashboard');
-
-        // List Kelas
-        Route::get('/kelas', function () {
-            return view('siswa.kelas.index');
-        })->name('kelas.index');
-
-        // Jadwal
-        Route::get('/jadwal', function () {
-            return view('siswa.jadwal.index');
-        })->name('jadwal.index');
-
-        // Profile
-        Route::get('/my-profile', function () {
-            return view('siswa.profile.index');
-        })->name('profile.index');
+        Route::view('/dashboard', 'siswa.dashboard')->name('dashboard');
+        Route::view('/kelas', 'siswa.kelas.index')->name('kelas.index');
+        Route::view('/jadwal', 'siswa.jadwal.index')->name('jadwal.index');
+        Route::view('/my-profile', 'siswa.profile.index')->name('profile.index');
     });
 
 /*
@@ -132,10 +105,10 @@ Route::middleware(['auth', 'role:student'])
 | PROFILE SETTINGS (GLOBAL)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware('auth')->controller(ProfileController::class)->group(function () {
+    Route::get('/profile', 'edit')->name('profile.edit');
+    Route::patch('/profile', 'update')->name('profile.update');
+    Route::delete('/profile', 'destroy')->name('profile.destroy');
 });
 
 require __DIR__ . '/auth.php';
