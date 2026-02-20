@@ -11,79 +11,82 @@ class ClassRoomController extends Controller
 {
     public function index(Request $request)
     {
-        // Query: Hanya kelas dimana user ini adalah pengajarnya
-        $query = ClassRoom::where('school_id', Auth::user()->school_id)
-            ->where('teacher_id', Auth::id()) // FILTER PENTING: Hanya kelas dia sendiri
-            ->with(['subject']) // Tidak perlu load teacher lagi karena sudah pasti dia
-            ->withCount(['students', 'meetings', 'announcements']);
-
-        // Logika Search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('name', 'like', '%' . $search . '%');
-        }
-
-        // Logika Sorting
-        if ($request->filled('sort')) {
-            if ($request->sort == 'terbaru') $query->latest();
-            elseif ($request->sort == 'terlama') $query->oldest();
-            elseif ($request->sort == 'siswa') $query->orderBy('students_count', 'desc');
-        } else {
-            $query->latest();
-        }
-
-        $classes = $query->get();
+        $classes = ClassRoom::where('school_id', Auth::user()->school_id)
+            ->where('teacher_id', Auth::id())
+            ->with(['subject'])
+            ->withCount(['students', 'meetings', 'announcements'])
+            // Clean code: Gunakan when() untuk pencarian
+            ->when($request->search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            // Clean code: Gunakan when() dan match() untuk sorting
+            ->when($request->sort, function ($query, $sort) {
+                match ($sort) {
+                    'terlama' => $query->oldest(),
+                    'siswa'   => $query->orderByDesc('students_count'),
+                    default   => $query->latest(), // default 'terbaru'
+                };
+            }, function ($query) {
+                $query->latest(); // Default jika tidak ada request sort
+            })
+            ->get();
 
         return view('pengajar.kelas.index', compact('classes'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        // 1. Ambil Data Kelas dengan Relasi Lengkap
-        // Menggunakan where 'id' dan 'teacher_id' sekaligus untuk keamanan (agar pengajar lain tidak bisa akses via URL)
+        // 1. Ambil Data Kelas Utama (beserta relasi untuk Feed Beranda)
         $kelas = ClassRoom::where('id', $id)
             ->where('teacher_id', Auth::id())
             ->with([
                 'subject',
                 'teacher',
                 'students',
-                // Load Announcement urutkan dari yang terbaru
-                'announcements' => function($q) {
-                    $q->latest();
-                },
-                // Load Meetings urutkan dari yang terbaru
-                'meetings' => function($q) {
-                    $q->latest();
-                }
+                'announcements' => fn($q) => $q->latest(),
+                'meetings'      => fn($q) => $q->latest() // Untuk Feed Beranda murni
             ])
             ->withCount(['students', 'meetings', 'announcements'])
-            ->firstOrFail(); // Akan return 404 jika ID salah atau bukan milik pengajar tersebut
+            ->firstOrFail();
 
-        // 2. Logika Mapping Data untuk Tab "Beranda" (Feed Campuran)
-        
-        // Mapping Pengumuman
-        $announcements = $kelas->announcements->map(function($item) {
-            // Kita set properti 'type' secara manual agar di View bisa dicek @if($item->type == 'announcement')
-            $item->type = 'announcement'; 
-            $item->date_sort = $item->created_at;
+        // 2. Query Khusus Tab "Daftar Pertemuan" (Terapkan Filter)
+        $tabMeetings = $kelas->meetings()
+            // Pencarian Teks (Judul / Deskripsi)
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            // Filter Jenis (Materi / Tugas)
+            ->when($request->type_filter, function ($query, $type) {
+                $query->where('type', $type);
+            })
+            // Filter Topik (BARU)
+            ->when($request->topic_filter, function ($query, $topic) {
+                $query->where('topic', $topic);
+            })
+            ->latest()
+            ->get();
+
+
+        // 3. Logika Mapping Data untuk Tab "Beranda" (Feed Campuran)
+        // Gunakan atribut bantuan 'feed_type' agar tidak menimpa kolom 'type' bawaan meeting
+        $announcements = $kelas->announcements->map(function ($item) {
+            $item->feed_type = 'announcement';
             return $item;
         });
 
-        // Mapping Pertemuan
-        $meetings = $kelas->meetings->map(function($item) {
-            // Backup tipe asli (misal: 'tugas' atau 'materi') ke variabel baru 'type_meeting'
-            // karena variabel 'type' akan kita pakai untuk logika Feed
-            $item->type_meeting = $item->type; 
-            
-            // Set type utama jadi 'meeting' untuk logika View Beranda
-            $item->type = 'meeting'; 
-            $item->date_sort = $item->created_at;
+        $meetingsForFeed = $kelas->meetings->map(function ($item) {
+            $item->feed_type = 'meeting';
             return $item;
         });
 
-        // 3. Gabungkan Collection dan Sort berdasarkan tanggal terbaru (date_sort)
-        $feeds = $announcements->concat($meetings)->sortByDesc('date_sort');
+        // Gabungkan dan urutkan berdasarkan waktu pembuatan terbaru
+        $feeds = $announcements->concat($meetingsForFeed)
+            ->sortByDesc('created_at')
+            ->values(); // Reset array keys setelah di-sort
 
-        return view('pengajar.kelas.show', compact('kelas', 'feeds'));
+        return view('pengajar.kelas.show', compact('kelas', 'feeds', 'tabMeetings'));
     }
 }

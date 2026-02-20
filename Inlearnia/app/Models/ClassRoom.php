@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClassRoom extends Model
 {
     use HasFactory;
 
-    // Nama tabel manual
     protected $table = 'classes';
 
     protected $fillable = [
@@ -21,42 +23,33 @@ class ClassRoom extends Model
         'logo',
     ];
 
-    /* ================= RELATIONSHIPS ================= */
-
-    public function school()
+    public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
     }
 
-    public function subject()
+    public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
-    public function teacher()
+    public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    public function students()
+    public function students(): BelongsToMany
     {
-        return $this->belongsToMany(
-            User::class,
-            'class_students',
-            'class_id',
-            'student_id'
-        );
+        return $this->belongsToMany(User::class, 'class_students', 'class_id', 'student_id');
     }
 
-    public function meetings()
+    public function meetings(): HasMany
     {
         return $this->hasMany(Meeting::class, 'class_id');
     }
 
-    // --- INI YANG BARU DITAMBAHKAN ---
-    public function announcements()
+    public function announcements(): HasMany
     {
-        // Parameter kedua 'class_id' wajib ada karena nama tabelmu 'classes'
         return $this->hasMany(Announcement::class, 'class_id');
     }
 }
