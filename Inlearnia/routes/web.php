@@ -30,10 +30,10 @@ Route::view('/', 'welcome');
 */
 Route::middleware(['auth'])->get('/dashboard', function () {
     return match (auth()->user()->role) {
-        'admin'   => redirect()->route('admin.dashboard'),
+        'admin' => redirect()->route('admin.dashboard'),
         'teacher' => redirect()->route('teacher.dashboard'),
         'student' => redirect()->route('student.dashboard'),
-        default   => abort(403),
+        default => abort(403),
     };
 })->name('dashboard');
 
@@ -50,7 +50,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('users', AdminUserController::class);
         Route::resource('mapel', SubjectController::class)->parameters(['mapel' => 'subject']);
         Route::resource('kelas', AdminClassRoomController::class);
-        
+
         Route::view('/my-profile', 'admin.profile.index')->name('profile.index');
     });
 
@@ -64,11 +64,13 @@ Route::middleware(['auth', 'role:teacher'])
     ->name('teacher.')
     ->group(function () {
         Route::view('/dashboard', 'pengajar.dashboard')->name('dashboard');
-        
+
         // List Kelas
         Route::controller(TeacherClassRoomController::class)->group(function () {
             Route::get('/kelas', 'index')->name('kelas.index');
             Route::get('/kelas/{kelas}', 'show')->name('kelas.show');
+
+            Route::delete('/kelas/{kelas}/students/{student}', 'removeStudent')->name('kelas.removeStudent');
         });
 
         // Pertemuan (Meetings) - Hanya except index (karena listnya ada di dalam detail kelas)
@@ -77,6 +79,7 @@ Route::middleware(['auth', 'role:teacher'])
         // Pengumuman (Announcements)
         Route::controller(AnnouncementController::class)->group(function () {
             Route::post('/announcements', 'store')->name('announcements.store');
+            Route::put('/announcements/{announcement}', 'update')->name('announcements.update'); // ✅ INI
             Route::delete('/announcements/{announcement}', 'destroy')->name('announcements.destroy');
         });
 

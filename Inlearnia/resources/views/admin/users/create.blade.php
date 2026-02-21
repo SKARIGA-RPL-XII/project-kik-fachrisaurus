@@ -2,7 +2,7 @@
 
 @section('content')
     <x-sidebar />
-<h1>Tambah User</h1>
+<h1>Tambah Pengguna</h1>
 
 @if ($errors->any())
     <div>

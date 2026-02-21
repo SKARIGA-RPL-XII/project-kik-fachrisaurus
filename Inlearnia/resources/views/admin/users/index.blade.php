@@ -17,7 +17,7 @@
             </span>
         </x-ui.title>
 
-        <x-ui.button-create href="{{ route('admin.users.create') }}" label="Tambah User" />
+        <x-ui.button-create href="{{ route('admin.users.create') }}" label="Tambah Pengguna" />
     </div>
 
     <div class="bg-white rounded-[20px] shadow-sm border border-slate-200 p-6">

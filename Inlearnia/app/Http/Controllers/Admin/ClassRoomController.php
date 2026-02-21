@@ -21,11 +21,11 @@ class ClassRoomController extends Controller
         // 2. Logika Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhereHas('teacher', function($t) use ($search) {
-                      $t->where('name', 'like', '%' . $search . '%');
-                  });
+                    ->orWhereHas('teacher', function ($t) use ($search) {
+                        $t->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -89,7 +89,8 @@ class ClassRoomController extends Controller
 
     public function edit(ClassRoom $kela) // Pastikan nama parameter route binding sesuai (kela/classRoom)
     {
-        if ($kela->school_id != Auth::user()->school_id) abort(403);
+        if ($kela->school_id != Auth::user()->school_id)
+            abort(403);
 
         $subjects = Subject::where('school_id', Auth::user()->school_id)->get();
         $teachers = User::where('school_id', Auth::user()->school_id)->where('role', 'teacher')->get();
@@ -101,7 +102,8 @@ class ClassRoomController extends Controller
 
     public function update(Request $request, ClassRoom $kela)
     {
-        if ($kela->school_id != Auth::user()->school_id) abort(403);
+        if ($kela->school_id != Auth::user()->school_id)
+            abort(403);
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -132,16 +134,60 @@ class ClassRoomController extends Controller
 
     public function destroy(ClassRoom $kela)
     {
-        if ($kela->school_id != Auth::user()->school_id) abort(403);
+        if ($kela->school_id != Auth::user()->school_id)
+            abort(403);
         $kela->delete();
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil dihapus!');
     }
 
-    public function show(ClassRoom $kelas)
-{
-    $kelas->load(['subject', 'teacher', 'students']);
+    public function show(ClassRoom $kela)
+    {
+        if ($kela->school_id != Auth::user()->school_id)
+            abort(403);
 
-    return view('admin.kelas.show', compact('kelas'));
-}
+        $kela->load(['subject', 'teacher'])
+            ->loadCount(['students', 'meetings', 'announcements']);
+
+        // Feed beranda
+        $announcements = $kela->announcements()->with('user')->get()
+            ->map(fn($a) => $a->setAttribute('feed_type', 'announcement'));
+
+        $allMeetings = $kela->meetings()->latest()->get()
+            ->map(fn($m) => $m->setAttribute('feed_type', 'meeting'));
+
+        $feeds = $announcements->concat($allMeetings)->sortByDesc('created_at')->values();
+
+        // Tab pertemuan — terapkan filter dari request
+        $tabMeetings = $kela->meetings()->latest()->get();
+
+        if (request()->filled('type_filter')) {
+            $tabMeetings = $tabMeetings->where('type', request('type_filter'));
+        }
+
+        if (request()->filled('topic_filter')) {
+            $tabMeetings = $tabMeetings->where('topic', request('topic_filter'));
+        }
+
+        if (request()->filled('search')) {
+            $search = strtolower(request('search'));
+            $tabMeetings = $tabMeetings->filter(
+                fn($m) => str_contains(strtolower($m->title), $search)
+                || str_contains(strtolower($m->description ?? ''), $search)
+            );
+        }
+
+        // Tab anggota
+        $studentsQuery = $kela->students()->getQuery()->select('users.*');
+        if (request()->filled('search') && request('tab') === 'anggota') {
+            $s = request('search');
+            $studentsQuery->where(fn($q) => $q->where('name', 'like', "%{$s}%")
+                ->orWhere('email', 'like', "%{$s}%"));
+        }
+        $students = $studentsQuery->paginate(10);
+
+        $kelas = $kela;
+
+        return view('admin.kelas.show', compact('kelas', 'feeds', 'tabMeetings', 'students'));
+    }
 
 }
