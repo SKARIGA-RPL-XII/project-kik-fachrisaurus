@@ -48,8 +48,8 @@
         <div class="col-span-4 bg-white p-6 rounded-[15px] shadow-sm border border-slate-50 flex flex-col h-full">
             <h2 class="text-[16px] font-bold text-[#092C4C] mb-6">Pengajar Terbaru</h2>
 
-            {{-- Menggunakan justify-between agar 5 item menyebar rata mengisi tinggi card --}}
-            <div class="flex flex-col justify-between flex-grow">
+            {{-- Gunakan flex-col + gap untuk daftar dinamis --}}
+            <div class="flex flex-col flex-grow gap-y-3 overflow-y-auto">
                 @foreach($latestTeachers as $teacher)
                     <div class="flex items-center justify-between group py-1">
                         <div class="flex items-center gap-3 overflow-hidden">
@@ -58,26 +58,24 @@
                                     class="w-full h-full object-cover">
                             </div>
                             <div class="overflow-hidden">
-                                <h4 class="text-[13px] font-bold text-[#434343] truncate leading-tight">{{ $teacher->name }}
-                                </h4>
+                                <h4 class="text-[13px] font-bold text-[#434343] truncate leading-tight">{{ $teacher->name }}</h4>
                                 <p class="text-[11px] text-[#C9C9C9] font-light truncate">{{ $teacher->email }}</p>
                             </div>
                         </div>
 
                         <a href="{{ route('admin.users.show', $teacher->id) }}"
                             class="w-[22px] h-[22px] bg-[#00A79D] rounded-full flex items-center justify-center text-white shrink-0 shadow-sm">
-
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="w-3 h-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="3">
-                                    <path stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-3 h-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="3">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
                     </div>
                 @endforeach
             </div>
