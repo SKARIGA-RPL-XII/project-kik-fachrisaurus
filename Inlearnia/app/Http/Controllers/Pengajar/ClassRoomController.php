@@ -15,20 +15,14 @@ class ClassRoomController extends Controller
             ->where('teacher_id', Auth::id())
             ->with(['subject'])
             ->withCount(['students', 'meetings', 'announcements'])
-            // Clean code: Gunakan when() untuk pencarian
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            // Clean code: Gunakan when() dan match() untuk sorting
-            ->when($request->sort, function ($query, $sort) {
+            ->when($request->search, fn($q, $search) => $q->where('name', 'like', "%{$search}%"))
+            ->when($request->sort, function ($q, $sort) {
                 match ($sort) {
-                    'terlama' => $query->oldest(),
-                    'siswa'   => $query->orderByDesc('students_count'),
-                    default   => $query->latest(), // default 'terbaru'
+                    'terlama' => $q->oldest(),
+                    'siswa'   => $q->orderByDesc('students_count'),
+                    default   => $q->latest(),
                 };
-            }, function ($query) {
-                $query->latest(); // Default jika tidak ada request sort
-            })
+            }, fn($q) => $q->latest())
             ->get();
 
         return view('pengajar.kelas.index', compact('classes'));
@@ -36,57 +30,49 @@ class ClassRoomController extends Controller
 
     public function show(Request $request, $id)
     {
-        // 1. Ambil Data Kelas Utama (beserta relasi untuk Feed Beranda)
         $kelas = ClassRoom::where('id', $id)
             ->where('teacher_id', Auth::id())
             ->with([
                 'subject',
                 'teacher',
-                'students',
                 'announcements' => fn($q) => $q->latest(),
-                'meetings'      => fn($q) => $q->latest() // Untuk Feed Beranda murni
+                'meetings'      => fn($q) => $q->latest()
             ])
             ->withCount(['students', 'meetings', 'announcements'])
             ->firstOrFail();
 
-        // 2. Query Khusus Tab "Daftar Pertemuan" (Terapkan Filter)
         $tabMeetings = $kelas->meetings()
-            // Pencarian Teks (Judul / Deskripsi)
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
-            // Filter Jenis (Materi / Tugas)
-            ->when($request->type_filter, function ($query, $type) {
-                $query->where('type', $type);
-            })
-            // Filter Topik (BARU)
-            ->when($request->topic_filter, function ($query, $topic) {
-                $query->where('topic', $topic);
-            })
+            ->when($request->search, fn($q, $search) => $q->where(fn($sub) => $sub->where('title', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%")))
+            ->when($request->type_filter, fn($q, $type) => $q->where('type', $type))
+            ->when($request->topic_filter, fn($q, $topic) => $q->where('topic', $topic))
             ->latest()
             ->get();
 
+        $students = $kelas->students()
+            ->when($request->search, fn($q, $search) => $q->where(fn($sub) => $sub->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
+            ->paginate(10)
+            ->withQueryString();
 
-        // 3. Logika Mapping Data untuk Tab "Beranda" (Feed Campuran)
-        // Gunakan atribut bantuan 'feed_type' agar tidak menimpa kolom 'type' bawaan meeting
-        $announcements = $kelas->announcements->map(function ($item) {
-            $item->feed_type = 'announcement';
-            return $item;
-        });
+        $announcements = $kelas->announcements->map(fn($item) => tap($item, fn($i) => $i->feed_type = 'announcement'));
+        $meetingsForFeed = $kelas->meetings->map(fn($item) => tap($item, fn($i) => $i->feed_type = 'meeting'));
 
-        $meetingsForFeed = $kelas->meetings->map(function ($item) {
-            $item->feed_type = 'meeting';
-            return $item;
-        });
-
-        // Gabungkan dan urutkan berdasarkan waktu pembuatan terbaru
         $feeds = $announcements->concat($meetingsForFeed)
             ->sortByDesc('created_at')
-            ->values(); // Reset array keys setelah di-sort
+            ->values();
 
-        return view('pengajar.kelas.show', compact('kelas', 'feeds', 'tabMeetings'));
+        return view('pengajar.kelas.show', compact('kelas', 'feeds', 'tabMeetings', 'students'));
+    }
+
+    public function removeStudent($kelasId, $studentId)
+    {
+        $kelas = ClassRoom::where('id', $kelasId)
+            ->where('teacher_id', Auth::id())
+            ->firstOrFail();
+
+        $kelas->students()->detach($studentId);
+
+        return back()
+            ->with('success', 'Siswa berhasil dikeluarkan dari kelas.')
+            ->with('tab', 'anggota');
     }
 }
