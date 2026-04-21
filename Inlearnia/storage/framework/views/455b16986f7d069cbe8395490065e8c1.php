@@ -13,7 +13,7 @@
     
     <link rel="icon" type="image/png" href="<?php echo e(asset('assets/img/favicon-dark.png')); ?>?v=<?php echo e(time()); ?>"
         media="(prefers-color-scheme: dark)">
-        
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
@@ -24,7 +24,7 @@
 <body class="min-h-screen text-white font-sans no-drag no-copy">
 
     <div class="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-animate"
-     style="background-image: url('assets/img/splash-bg.png');">
+        style="background-image: url('assets/img/splash-bg.png');">
 
 
         <!-- Content -->
@@ -39,7 +39,7 @@
             <!-- Title -->
             <h1 class="font-semibold tracking-tight text-center leading-snug mb-8 fade-in"
                 style="font-size: clamp(1.5rem, 5vw, 3rem); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; animation-delay:0s;">
-                Ruang Belajar Digital
+                Welcome to Inlearnia
             </h1>
 
             <!-- Subtitle lurus, center -->
@@ -77,7 +77,8 @@
             <div class="flex flex-col md:flex-row gap-7 justify-center">
 
                 <!-- Button Left -->
-                <a href="<?php echo e(route('register')); ?>" class="group flex items-center justify-center gap-5 px-12 py-6 rounded-full
+                <a href="<?php echo e(route('register')); ?>"
+                    class="group flex items-center justify-center gap-5 px-12 py-6 rounded-full
         bg-white/5 backdrop-blur-xl border border-white/15 shadow-lg shadow-black/30
         transition-all duration-300 hover:bg-[#0BA69A]/90 hover:border-[#0BA69A]/80 hover:shadow-[#0BA69A]/30 hover:-translate-y-1
         relative overflow-hidden w-full md:w-auto text-center fade-in-btn">
@@ -91,13 +92,13 @@
                 </a>
 
                 <!-- Button Right -->
-                <a href="<?php echo e(route('login')); ?>" class="group flex items-center justify-center gap-5 px-12 py-6 rounded-full
+                <a href="<?php echo e(route('login')); ?>"
+                    class="group flex items-center justify-center gap-5 px-12 py-6 rounded-full
         bg-white/5 backdrop-blur-xl border border-white/15 shadow-lg shadow-black/30
         transition-all duration-300 hover:bg-[#0BA69A]/90 hover:border-[#0BA69A]/80 hover:shadow-[#0BA69A]/30 hover:-translate-y-1
         w-full md:w-auto text-center fade-in-btn">
 
-                    <img src="assets/img/login.svg" alt="Inlearnia"
-                        class="h-8 w-8 opacity-90 group-hover:opacity-100">
+                    <img src="assets/img/login.svg" alt="Inlearnia" class="h-8 w-8 opacity-90 group-hover:opacity-100">
 
                     <span class="text-xl font-medium tracking-wide">
                         Masuk ke Aplikasi
@@ -108,4 +109,5 @@
         </div>
 </body>
 
-</html><?php /**PATH C:\laragon\www\project-kik-fachrisaurus\Inlearnia\resources\views/welcome.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\laragon\www\project-kik-fachrisaurus\Inlearnia\resources\views/welcome.blade.php ENDPATH**/ ?>

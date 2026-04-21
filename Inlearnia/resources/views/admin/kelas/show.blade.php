@@ -256,7 +256,7 @@
                         </div>
                     @endif
                 @empty
-                    <div class="text-center py-16 bg-slate-50 rounded-[15px] border border-dashed border-slate-200">
+                    <div class="text-center py-16 bg-white rounded-[15px] border border-dashed border-slate-200">
                         <svg class="w-16 h-16 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-width="1.5"

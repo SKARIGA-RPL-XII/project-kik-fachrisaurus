@@ -1,43 +1,42 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Pengajar;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\ClassRoom;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class AdminDashboardController extends Controller
+class TeacherDashboardController extends Controller
 {
     public function index()
     {
-        $schoolId = Auth::user()->school_id;
+        $teacher   = Auth::user(); // ← ganti dari Auth::id() biar bisa pass ke view
+        $teacherId = $teacher->id;
 
-        // Statistik
-        $totalKelas = ClassRoom::where('school_id', $schoolId)->count();
-        $totalPengajar = User::where('school_id', $schoolId)->where('role', 'teacher')->count();
-        $totalSiswa = User::where('school_id', $schoolId)->where('role', 'student')->count();
+        $totalKelasSaya = ClassRoom::where('teacher_id', $teacherId)->count();
 
-        // 5 pengajar terbaru
-        $latestTeachers = User::where('school_id', $schoolId)
-            ->where('role', 'teacher')
-            ->latest()
-            ->take(5)
+        $totalSiswaDiajar = User::where('role', 'student')
+            ->whereHas('classes', fn($q) => $q->where('teacher_id', $teacherId))
+            ->count();
+
+        $myClasses = ClassRoom::where('teacher_id', $teacherId)
+            ->with(['subject'])
+            ->withCount('students')
+            ->latest() // ← tambah latest() biar urut terbaru
             ->get();
 
-        // 5 kelas terbaru
-        $latestClasses = ClassRoom::where('school_id', $schoolId)
-            ->latest()
-            ->take(5)
-            ->get();
+        // Kosongkan dulu, isi nanti kalau sudah ada tabel submissions
+        $totalTugasBelumDinilai = 0;
+        $latestSubmissions      = collect([]);
 
-        return view('admin.dashboard', compact(
-            'totalKelas',
-            'totalPengajar',
-            'totalSiswa',
-            'latestTeachers',
-            'latestClasses'
+        return view('pengajar.dashboard', compact(
+            'teacher',
+            'totalKelasSaya',
+            'totalSiswaDiajar',
+            'totalTugasBelumDinilai',
+            'myClasses',
+            'latestSubmissions',
         ));
     }
 }

@@ -1,6 +1,7 @@
 @props(['href'])
 
 <a href="{{ $href }}" 
+   {{ $attributes }}
    class="w-9 h-9 flex items-center justify-center rounded-[8px] bg-amber-50 text-amber-500 hover:bg-amber-500 hover:text-white transition shadow-sm"
    title="Edit">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

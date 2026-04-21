@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Meeting extends Model
 {
-
-
-
-
-
     use HasFactory;
 
     // Pastikan semua nama kolom sama persis dengan yang ada di migrasi

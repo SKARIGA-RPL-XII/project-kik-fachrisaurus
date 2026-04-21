@@ -65,11 +65,11 @@ class ClassRoomController extends Controller
             'logo' => ['nullable', 'image', 'max:2048'],
             'subject_id' => ['required', 'exists:subjects,id'],
             'teacher_id' => ['required', 'exists:users,id'],
-            'students' => ['nullable', 'array'],
-            'students.*' => ['exists:users,id'],
         ]);
 
-        $logoPath = $request->hasFile('logo') ? $request->file('logo')->store('classes', 'public') : null;
+        $logoPath = $request->hasFile('logo')
+            ? $request->file('logo')->store('classes', 'public')
+            : null;
 
         $class = ClassRoom::create([
             'school_id' => Auth::user()->school_id,
@@ -80,13 +80,13 @@ class ClassRoomController extends Controller
             'logo' => $logoPath,
         ]);
 
-        if ($request->filled('students')) {
-            $class->students()->sync($request->students);
+        $studentIds = json_decode($request->input('students', '[]'), true) ?? [];
+        if (!empty($studentIds)) {
+            $class->students()->sync($studentIds);
         }
 
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil ditambahkan!');
     }
-
     public function edit(ClassRoom $kela) // Pastikan nama parameter route binding sesuai (kela/classRoom)
     {
         if ($kela->school_id != Auth::user()->school_id)
@@ -101,37 +101,35 @@ class ClassRoomController extends Controller
     }
 
     public function update(Request $request, ClassRoom $kela)
-    {
-        if ($kela->school_id != Auth::user()->school_id)
-            abort(403);
+{
+    if ($kela->school_id != Auth::user()->school_id) abort(403);
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'logo' => ['nullable', 'image', 'max:2048'],
-            'subject_id' => ['required', 'exists:subjects,id'],
-            'teacher_id' => ['required', 'exists:users,id'],
-            'students' => ['nullable', 'array'],
-            'students.*' => ['exists:users,id'],
-        ]);
+    $request->validate([
+        'name'        => ['required', 'string', 'max:255'],
+        'description' => ['nullable', 'string'],
+        'logo'        => ['nullable', 'image', 'max:2048'],
+        'subject_id'  => ['required', 'exists:subjects,id'],
+        'teacher_id'  => ['required', 'exists:users,id'],
+    ]);
 
-        $data = [
-            'subject_id' => $request->subject_id,
-            'teacher_id' => $request->teacher_id,
-            'name' => $request->name,
-            'description' => $request->description,
-        ];
+    $data = [
+        'subject_id'  => $request->subject_id,
+        'teacher_id'  => $request->teacher_id,
+        'name'        => $request->name,
+        'description' => $request->description,
+    ];
 
-        if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('classes', 'public');
-        }
-
-        $kela->update($data);
-        $kela->students()->sync($request->students ?? []);
-
-        return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil diupdate!');
+    if ($request->hasFile('logo')) {
+        $data['logo'] = $request->file('logo')->store('classes', 'public');
     }
 
+    $kela->update($data);
+
+    $studentIds = json_decode($request->input('students', '[]'), true) ?? [];
+    $kela->students()->sync($studentIds);
+
+    return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil diupdate!');
+}
     public function destroy(ClassRoom $kela)
     {
         if ($kela->school_id != Auth::user()->school_id)

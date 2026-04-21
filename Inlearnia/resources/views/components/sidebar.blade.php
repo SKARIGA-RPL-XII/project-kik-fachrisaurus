@@ -5,7 +5,7 @@
     @php
         $user = auth()->user();
         $role = $user->role; // 'admin', 'teacher', or 'student'
-        
+
         // Tentukan route dashboard berdasarkan role
         $dashboardRoute = route($role . '.dashboard');
     @endphp
@@ -95,11 +95,11 @@
                     {{-- List Kelas (UBAH DISINI: Ganti "List Kelas" jadi "Kelas Saya") --}}
                     @php $kelasRoute = route($role . '.kelas.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.kelas.*'); @endphp
-                    
+
                     {{-- List Kelas / Kelas Saya (Ikon disamakan dengan Admin) --}}
                     @php $kelasRoute = route($role . '.kelas.index'); @endphp
                     @php $isActive = request()->routeIs($role . '.kelas.*'); @endphp
-                    
+
                     <a href="{{ $kelasRoute }}"
                         class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
                         {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
@@ -114,31 +114,7 @@
                         <span class="text-[14px] font-medium">Kelas Saya</span>
                     </a>
 
-                    {{-- Jadwal Saya --}}
-                    @php $jadwalRoute = route($role . '.jadwal.index'); @endphp
-                    @php $isActive = request()->routeIs($role . '.jadwal.*'); @endphp
                     
-                    <a href="{{ $jadwalRoute }}"
-                        class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 
-                {{ $isActive ? 'bg-[#044153] text-white' : 'text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]' }}">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z"
-                                stroke="{{ $isActive ? '#FFFFFF' : 'currentColor' }}" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
-                            <path d="M16 2V6" stroke="{{ $isActive ? '#FFFFFF' : 'currentColor' }}" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
-                            <path d="M8 2V6" stroke="{{ $isActive ? '#FFFFFF' : 'currentColor' }}" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
-                            <path d="M3 10H21" stroke="{{ $isActive ? '#FFFFFF' : 'currentColor' }}" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round"
-                                class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
-                        </svg>
-                        <span class="text-[14px] font-medium">Jadwal Saya</span>
-                    </a>
                 </div>
                 <div class="mt-[30px] px-[20px]">
                     <hr class="border-t border-[#D9D9D9]">
@@ -188,7 +164,7 @@
                             stroke-linecap="round" stroke-linejoin="round"
                             class="{{ $isActive ? 'opacity-80' : 'opacity-50' }}" />
                     </svg>
-                    <span class="text-[14px] font-medium">Profil Saya</span>
+                    <span class="text-[14px] font-medium">Profil</span>
                 </a>
 
                 {{-- Logout --}}
@@ -198,8 +174,8 @@
 
                 <a href="#" onclick="confirmLogout()"
                     class="flex items-center gap-3 w-[235px] h-[40px] px-[15px] rounded-[8px] transition-all duration-200 text-[#5E5E5E] hover:bg-[#DFDFDF] hover:text-[#044153]">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" class="opacity-50">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" class="opacity-50">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>

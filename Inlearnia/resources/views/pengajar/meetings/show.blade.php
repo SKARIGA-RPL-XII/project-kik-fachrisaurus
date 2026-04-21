@@ -294,25 +294,39 @@
                     </div>
                 </div>
 
-                {{-- Placeholder / Mockup Ringkasan Pengumpulan Tugas --}}
                 <div class="bg-white rounded-[15px] p-6 shadow-sm border border-slate-200">
                     <h3 class="font-bold text-[#092C4C] mb-4">Ringkasan Pengumpulan</h3>
 
                     <div class="grid grid-cols-2 gap-4 mb-5">
                         <div class="bg-teal-50 rounded-[10px] p-4 text-center">
-                            <span class="block text-2xl font-bold text-[#00A79D]">0</span>
+                            <span class="block text-2xl font-bold text-[#00A79D]">{{ $stats['graded'] }}</span>
                             <span class="text-xs font-medium text-slate-500 uppercase">Dinilai</span>
                         </div>
-                        <div class="bg-orange-50 rounded-[10px] p-4 text-center">
-                            <span class="block text-2xl font-bold text-orange-500">0</span>
+                        <div class="bg-blue-50 rounded-[10px] p-4 text-center">
+                            <span class="block text-2xl font-bold text-blue-500">{{ $stats['total'] }}</span>
                             <span class="text-xs font-medium text-slate-500 uppercase">Terkumpul</span>
                         </div>
                     </div>
 
-                    <button
-                        class="w-full bg-[#092C4C] hover:bg-[#061b30] text-white py-2.5 rounded-[8px] text-sm font-medium transition-colors">
-                        Lihat Jawaban Siswa &rarr;
-                    </button>
+                    {{-- Progress bar dinilai vs terkumpul --}}
+                    @if ($stats['total'] > 0)
+                        @php $pct = round(($stats['graded'] / $stats['total']) * 100); @endphp
+                        <div class="mb-5">
+                            <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                                <span>Progress penilaian</span>
+                                <span>{{ $pct }}%</span>
+                            </div>
+                            <div class="bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="h-full bg-[#00A79D] rounded-full transition-all"
+                                    style="width: {{ $pct }}%"></div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <a href="{{ route('teacher.meetings.submissions.index', $meeting) }}"
+                        class="block w-full text-center bg-[#092C4C] hover:bg-[#061b30] text-white py-2.5 rounded-[8px] text-sm font-medium transition-colors">
+                        Lihat Jawaban Siswa
+                    </a>
                 </div>
             @endif
 

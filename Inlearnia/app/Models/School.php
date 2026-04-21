@@ -11,8 +11,15 @@ class School extends Model
 
     protected $fillable = [
         'name',
+        'npsn',
         'address',
         'logo',
+        'principal_name',
+        'phone',
+        'email',
+        'level',
+        'status',
+        'accreditation',
     ];
 
     /* ================= RELATIONSHIPS ================= */

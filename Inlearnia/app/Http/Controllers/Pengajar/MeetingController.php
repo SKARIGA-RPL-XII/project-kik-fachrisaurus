@@ -26,18 +26,18 @@ class MeetingController extends Controller
     private function getValidationRules(): array
     {
         return [
-            'class_id'                => 'required|exists:classes,id',
-            'type'                    => 'required|in:tugas,materi',
-            'title'                   => 'required|string|max:255',
-            'description'             => 'nullable|string',
-            'topic'                   => 'nullable|string|max:255',
-            'links'                   => 'nullable|array',
-            'links.*'                 => 'nullable|url',
-            'files'                   => 'nullable|array',
-            'files.*'                 => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png|max:5120',
-            'deadline'                => 'nullable|date',
+            'class_id' => 'required|exists:classes,id',
+            'type' => 'required|in:tugas,materi',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'topic' => 'nullable|string|max:255',
+            'links' => 'nullable|array',
+            'links.*' => 'nullable|url',
+            'files' => 'nullable|array',
+            'files.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png|max:5120',
+            'deadline' => 'nullable|date',
             'disable_late_submission' => 'nullable|boolean',
-            'max_score'               => 'nullable|integer|min:0',
+            'max_score' => 'nullable|integer|min:0',
         ];
     }
 
@@ -51,9 +51,9 @@ class MeetingController extends Controller
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
                 $uploadedFiles[] = [
-                    'path'          => $file->store('meetings', 'public'),
+                    'path' => $file->store('meetings', 'public'),
                     'original_name' => $file->getClientOriginalName(),
-                    'size'          => $file->getSize(),
+                    'size' => $file->getSize(),
                 ];
             }
         }
@@ -68,7 +68,7 @@ class MeetingController extends Controller
     {
         $request->validate([
             'kelas_id' => 'required|exists:classes,id',
-            'type'     => 'required|in:tugas,materi'
+            'type' => 'required|in:tugas,materi'
         ]);
 
         $kelas = ClassRoom::findOrFail($request->kelas_id);
@@ -108,16 +108,17 @@ class MeetingController extends Controller
 
     public function show(Meeting $meeting)
     {
-        // 1. Pastikan hanya pengajar dari kelas ini yang bisa mengakses
-        $this->authorizeTeacher($meeting->classRoom);
+        $submissions = $meeting->submissions()->get();
 
-        // 2. Load relasi yang diperlukan (misal: kelas untuk breadcrumb, atau submissions jika ada)
-        $meeting->load('classRoom');
+        $stats = [
+            'graded' => $submissions->filter(fn($s) => $s->score !== null)->count(),
+            'submitted' => $submissions->filter(fn($s) => $s->submitted_at && $s->score === null)->count(),
+            'total' => $submissions->count(),
+        ];
 
-        // 3. Tampilkan halaman detail
-        return view('pengajar.meetings.show', compact('meeting'));
+        return view('pengajar.meetings.show', compact('meeting', 'stats'));
     }
-    
+
     public function edit(Meeting $meeting)
     {
         $this->authorizeTeacher($meeting->classRoom);
@@ -135,14 +136,14 @@ class MeetingController extends Controller
         // Untuk update, class_id dan type kita ambil paksa dari data lama agar tidak dimanipulasi
         $request->merge([
             'class_id' => $meeting->class_id,
-            'type'     => $meeting->type,
+            'type' => $meeting->type,
         ]);
 
         $validated = $request->validate($this->getValidationRules());
 
         // Ambil file lama dan gabungkan dengan file baru
         $existingFiles = is_array($meeting->files) ? $meeting->files : [];
-        
+
         $validated['links'] = array_filter($request->links ?? []);
         $validated['files'] = $this->handleFileUploads($request, $existingFiles);
 

@@ -9,11 +9,19 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\ClassRoomController as AdminClassRoomController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 
 // Teacher Controllers
 use App\Http\Controllers\Pengajar\ClassRoomController as TeacherClassRoomController;
-use App\Http\Controllers\Pengajar\MeetingController;
-use App\Http\Controllers\Pengajar\AnnouncementController;
+use App\Http\Controllers\Pengajar\MeetingController as TeacherMeetingController;
+use App\Http\Controllers\Pengajar\AnnouncementController as TeacherAnnouncementController;
+use App\Http\Controllers\Pengajar\SubmissionController as TeacherSubmissionController;
+
+// Student Controllers
+use App\Http\Controllers\Siswa\ClassRoomController as SiswaClassRoomController;
+use App\Http\Controllers\Siswa\MeetingController as SiswaMeetingController;
+use App\Http\Controllers\Siswa\SubmissionController as SiswaSubmissionController;
+use App\Http\Controllers\Siswa\AnnouncementController as SiswaAnnouncementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,72 +54,113 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
         Route::resource('users', AdminUserController::class);
         Route::resource('mapel', SubjectController::class)->parameters(['mapel' => 'subject']);
         Route::resource('kelas', AdminClassRoomController::class);
 
-        Route::view('/my-profile', 'admin.profile.index')->name('profile.index');
+        Route::get('/my-profile', [AdminProfileController::class, 'index'])->name('profile.index');
+
+        Route::get('/my-profile/school/edit', [AdminProfileController::class, 'editSchool'])
+            ->name('profile.school.edit');
+
+        Route::patch('/my-profile/school', [AdminProfileController::class, 'updateSchool'])
+            ->name('profile.school.update');
+
+        Route::patch('/my-profile', [AdminProfileController::class, 'update'])
+            ->name('profile.update');
     });
 
 /*
 |--------------------------------------------------------------------------
-| TEACHER ROUTES (PENGAJAR)
+| TEACHER ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
-        Route::view('/dashboard', 'pengajar.dashboard')->name('dashboard');
 
-        // List Kelas
+        // UPDATE: Sekarang menggunakan Controller, bukan Route::view lagi
+        Route::get('/dashboard', [App\Http\Controllers\Pengajar\TeacherDashboardController::class, 'index'])->name('dashboard');
+
         Route::controller(TeacherClassRoomController::class)->group(function () {
             Route::get('/kelas', 'index')->name('kelas.index');
             Route::get('/kelas/{kelas}', 'show')->name('kelas.show');
-
             Route::delete('/kelas/{kelas}/students/{student}', 'removeStudent')->name('kelas.removeStudent');
         });
 
-        // Pertemuan (Meetings) - Hanya except index (karena listnya ada di dalam detail kelas)
-        Route::resource('meetings', MeetingController::class)->except(['index']);
+        Route::resource('meetings', TeacherMeetingController::class)->except(['index']);
 
-        // Pengumuman (Announcements)
-        Route::controller(AnnouncementController::class)->group(function () {
+        Route::controller(TeacherSubmissionController::class)->group(function () {
+            Route::get('/meetings/{meeting}/submissions', 'index')
+                ->name('meetings.submissions.index');
+            Route::get('/meetings/{meeting}/submissions/{submission}', 'show')
+                ->name('meetings.submissions.show');
+            Route::patch('/meetings/{meeting}/submissions/{submission}/grade', 'grade')
+                ->name('meetings.submissions.grade');
+        });
+
+        Route::controller(TeacherAnnouncementController::class)->group(function () {
             Route::post('/announcements', 'store')->name('announcements.store');
-            Route::put('/announcements/{announcement}', 'update')->name('announcements.update'); // ✅ INI
+            Route::put('/announcements/{announcement}', 'update')->name('announcements.update');
             Route::delete('/announcements/{announcement}', 'destroy')->name('announcements.destroy');
         });
 
-        // Menu Lainnya
         Route::view('/jadwal', 'pengajar.jadwal.index')->name('jadwal.index');
-        Route::view('/my-profile', 'pengajar.profile.index')->name('profile.index');
+
+        // Profile Routes
+        Route::get('/my-profile', [AdminProfileController::class, 'indexPengajar'])->name('profile.index');
+        Route::patch('/my-profile', [AdminProfileController::class, 'update'])->name('profile.update');
     });
 
 /*
 |--------------------------------------------------------------------------
-| STUDENT ROUTES (SISWA)
+| STUDENT ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:student'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
-        Route::view('/dashboard', 'siswa.dashboard')->name('dashboard');
-        Route::view('/kelas', 'siswa.kelas.index')->name('kelas.index');
+
+        Route::get('/dashboard', [App\Http\Controllers\Siswa\StudentDashboardController::class, 'index'])->name('dashboard');
+
         Route::view('/jadwal', 'siswa.jadwal.index')->name('jadwal.index');
         Route::view('/my-profile', 'siswa.profile.index')->name('profile.index');
-    });
 
-/*
-|--------------------------------------------------------------------------
-| PROFILE SETTINGS (GLOBAL)
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->controller(ProfileController::class)->group(function () {
-    Route::get('/profile', 'edit')->name('profile.edit');
-    Route::patch('/profile', 'update')->name('profile.update');
-    Route::delete('/profile', 'destroy')->name('profile.destroy');
-});
+        // CLASSROOM
+        Route::controller(SiswaClassRoomController::class)->group(function () {
+            Route::get('/kelas', 'index')->name('kelas.index');
+            Route::get('/kelas/{kelas}', 'show')->name('kelas.show');
+        });
+
+        // MEETING (DETAIL MATERI/TUGAS)
+        Route::controller(SiswaMeetingController::class)->group(function () {
+            Route::get('/meetings/{meeting}', 'show')->name('meetings.show');
+            Route::post('/meetings/{meeting}/summary', 'generateSummary')->name('meetings.summary');
+
+        });
+
+        // SUBMISSION
+        Route::controller(SiswaSubmissionController::class)->group(function () {
+            Route::post('/meetings/{meeting}/submit', 'store')->name('meetings.submit');
+            Route::delete('/meetings/{meeting}/cancel', 'cancel')->name('meetings.cancel');
+        });
+
+        Route::post('/announcements', [SiswaAnnouncementController::class, 'store'])
+            ->name('announcements.store');
+        Route::delete('/announcements/{announcement}', [SiswaAnnouncementController::class, 'destroy'])
+            ->name('announcements.destroy');
+
+        // PROFILE ROUTES
+        Route::get('/my-profile', [AdminProfileController::class, 'indexSiswa'])->name('profile.index');
+        Route::patch('/my-profile', [AdminProfileController::class, 'update'])->name('profile.update');
+
+        Route::get('/dashboard', [App\Http\Controllers\Siswa\StudentDashboardController::class, 'index'])->name('dashboard');
+
+    });
 
 require __DIR__ . '/auth.php';
